@@ -9,13 +9,20 @@ jobs:
   bootstrap:
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare ASR bundle
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download Vosk wheels
         shell: bash
         run: |
           set -euxo pipefail
           mkdir -p bundle/wheels bundle/model
-          python -m pip download --only-binary=:all: --dest bundle/wheels vosk
-          curl -fL --retry 3 -o bundle/model/vosk-model-small-ru-0.22.zip https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip
+          python -m pip download --dest bundle/wheels vosk
+      - name: Download Russian model
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o bundle/model/vosk-model-small-ru-0.22.zip https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip
           ls -lh bundle/wheels bundle/model
       - name: Upload ASR bundle
         uses: actions/upload-artifact@v4
